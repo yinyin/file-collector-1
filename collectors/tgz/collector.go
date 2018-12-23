@@ -13,3 +13,13 @@ func Collector(collectState *filecollector.CollectState, setup *filecollector.Co
 	// TODO: impl
 	return nil
 }
+
+var collectorDiscoverInstance filecollector.CollectorDiscover
+
+// DefaultTGZCollectorDiscover returns default instance of collector discovery routine
+func DefaultTGZCollectorDiscover() (collectorDiscover filecollector.CollectorDiscover) {
+	if nil == collectorDiscoverInstance {
+		collectorDiscoverInstance = filecollector.NewSimpleCollectorImplementation(SupportedSuffix, TypeName, Collector)
+	}
+	return collectorDiscoverInstance
+}
