@@ -15,6 +15,7 @@ type CollectDest struct {
 type CollectSetup struct {
 	FilePath     string
 	Destinations []*CollectDest
+	collectorCallable CollectorCallable
 }
 
 // CollectOperation shows setup of file collecting operation
@@ -35,7 +36,9 @@ func (x *CollectSetup) UnmarshalJSON(b []byte) (err error) {
 	}
 	x.FilePath = d.FilePath
 	x.Destinations = d.Destinations
-	// TODO: set collector
+	if x.collectorCallable, err = FindCollectorCallable(d.CollectorType, d.FilePath); nil != err {
+		return err
+	}
 	return nil
 }
 
