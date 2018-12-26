@@ -13,8 +13,8 @@ type CollectDest struct {
 
 // CollectSetup represents source of file collection
 type CollectSetup struct {
-	FilePath     string
-	Destinations []*CollectDest
+	FilePath          string
+	Destinations      []*CollectDest
 	collectorCallable CollectorCallable
 }
 
