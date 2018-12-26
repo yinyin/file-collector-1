@@ -1,6 +1,12 @@
 package tgz
 
-import filecollector "github.com/yinyin/file-collector-1"
+import (
+	"compress/gzip"
+	"os"
+
+	filecollector "github.com/yinyin/file-collector-1"
+	tarcollector "github.com/yinyin/file-collector-1/collectors/tar"
+)
 
 // SupportedSuffix is slice of supported file name suffix.
 var SupportedSuffix = []string{".tar.gz", ".tgz"}
@@ -10,8 +16,16 @@ var TypeName = "tgz"
 
 // Collector implements a collector for `.tar.gz` or `.tgz` suffixed files.
 func Collector(collectState *filecollector.CollectState, setup *filecollector.CollectSetup) (err error) {
-	// TODO: impl
-	return nil
+	fp, err := os.Open(setup.FilePath)
+	if nil != err {
+		return err
+	}
+	defer fp.Close()
+	gzfp, err := gzip.NewReader(fp)
+	if nil != err {
+		return err
+	}
+	return tarcollector.CollectViaReader(collectState, setup, gzfp)
 }
 
 var collectorDiscoverInstance filecollector.CollectorDiscover
