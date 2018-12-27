@@ -157,6 +157,33 @@ func (state *CollectState) Check(operationConfig *CollectOperation) (success boo
 	return success
 }
 
+// LogsState dumps state to logger.
+func (state *CollectState) LogsState() {
+	records := make([]*FileState, 0, len(state.FileStates))
+	for _, s := range state.FileStates {
+		records = append(records, s)
+	}
+	sort.Sort(FileStatesByPath(records))
+	log.Print("INFO: logging collect state.")
+	for _, s := range records {
+		log.Printf("file: %s (%v)", s.FilePath, s.CheckSum)
+		if len(s.SourceFiles) > 0 {
+			for _, furl := range s.SourceFiles {
+				log.Printf("- source: %s", furl)
+			}
+		} else {
+			log.Print("- source: -N/A-")
+		}
+		if len(s.ConflictFiles) > 0 {
+			for _, furl := range s.ConflictFiles {
+				log.Printf("- conflict: %s", furl)
+			}
+		} else {
+			log.Print("- conflict: -N/A-")
+		}
+	}
+}
+
 // MakeCheckSumFile generates checksum file via current file state records.
 func (state *CollectState) MakeCheckSumFile(filePath string) (err error) {
 	records := make([]*FileState, 0, len(state.FileStates))
