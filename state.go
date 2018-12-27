@@ -100,21 +100,20 @@ func (state *CollectState) CollectWithReader(destination *CollectDest, reader io
 	existedState, ok := state.FileStates[destination.ToPath]
 	if ok {
 		return existedState.addFileRecord(reader, sourceFilePath)
-	} else {
-		destFilePath := filepath.Join(state.DestinationFolderPath, destination.ToPath)
-		digest, err := saveFileContent(destFilePath, reader)
-		if nil != err {
-			return err
-		}
-		if err = os.Chmod(destFilePath, modeBits); nil != err {
-			log.Printf("ERROR: cannot set mode bits of given file [%s; 0%o]: %v", destFilePath, modeBits, err)
-		}
-		if err = os.Chtimes(destFilePath, time.Now(), modifyTime); nil != err {
-			log.Printf("ERROR: cannot set modify time of given file [%s; %v]: %v", destFilePath, modifyTime, err)
-		}
-		fileState := newFileState(destFilePath, digest, sourceFilePath)
-		state.FileStates[destination.ToPath] = fileState
 	}
+	destFilePath := filepath.Join(state.DestinationFolderPath, destination.ToPath)
+	digest, err := saveFileContent(destFilePath, reader)
+	if nil != err {
+		return err
+	}
+	if err = os.Chmod(destFilePath, modeBits); nil != err {
+		log.Printf("ERROR: cannot set mode bits of given file [%s; 0%o]: %v", destFilePath, modeBits, err)
+	}
+	if err = os.Chtimes(destFilePath, time.Now(), modifyTime); nil != err {
+		log.Printf("ERROR: cannot set modify time of given file [%s; %v]: %v", destFilePath, modifyTime, err)
+	}
+	fileState := newFileState(destFilePath, digest, sourceFilePath)
+	state.FileStates[destination.ToPath] = fileState
 	return nil
 }
 
