@@ -28,5 +28,13 @@ func main() {
 			return
 		}
 	}
-	// TODO: save checksum
+	if err = state.MakeCheckSumFile(operationCfg.ChecksumFilePath); nil != err {
+		log.Fatalf("failed on writing checksum file [%s]: %v", operationCfg.ChecksumFilePath, err)
+		return
+	}
+	if !state.Check() {
+		log.Fatalf("result is not in success state.")
+	} else {
+		log.Printf("INFO: complete successfully.")
+	}
 }

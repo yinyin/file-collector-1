@@ -3,10 +3,12 @@ package filecollector1
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 )
 
@@ -62,6 +64,15 @@ func (state *FileState) addFileRecord(reader io.Reader, sourceFilePath string) (
 	return nil
 }
 
+// FileStatesByPath is slice of FileState with sort interface implemented.
+type FileStatesByPath []*FileState
+
+func (a FileStatesByPath) Len() int      { return len(a) }
+func (a FileStatesByPath) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a FileStatesByPath) Less(i, j int) bool {
+	return a[i].FilePath < a[j].FilePath
+}
+
 // CollectState represents state of collecting
 type CollectState struct {
 	DestinationFolderPath string
@@ -97,6 +108,45 @@ func (state *CollectState) CollectWithReader(destination *CollectDest, reader io
 		}
 		fileState := newFileState(destFilePath, digest, sourceFilePath)
 		state.FileStates[destination.ToPath] = fileState
+	}
+	return nil
+}
+
+// Check check if errors in collecting operation.
+func (state *CollectState) Check() (success bool) {
+	success = true
+	for _, fileState := range state.FileStates {
+		if 0 != len(fileState.ConflictFiles) {
+			success = false
+			log.Printf("WARN: have conflict file: %v - %v", fileState.FilePath, fileState.ConflictFiles)
+		}
+	}
+	return success
+}
+
+// MakeCheckSumFile generates checksum file via current file state records.
+func (state *CollectState) MakeCheckSumFile(filePath string) (err error) {
+	records := make([]*FileState, 0, len(state.FileStates))
+	for _, s := range state.FileStates {
+		records = append(records, s)
+	}
+	sort.Sort(FileStatesByPath(records))
+	fp, err := os.OpenFile(filepath.Join(state.DestinationFolderPath, filePath), os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+	if nil != err {
+		return err
+	}
+	defer fp.Close()
+	for _, s := range records {
+		hexChksum := make([]byte, hex.EncodedLen(len(s.CheckSum)))
+		hex.Encode(hexChksum, s.CheckSum)
+		relPath, err := filepath.Rel(state.DestinationFolderPath, s.FilePath)
+		if nil != err {
+			return err
+		}
+		fp.Write(hexChksum)
+		fp.WriteString(" *")
+		fp.WriteString(relPath)
+		fp.WriteString("\n")
 	}
 	return nil
 }
