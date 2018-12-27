@@ -28,15 +28,15 @@ func CollectViaReader(collectState *filecollector.CollectState, setup *filecolle
 			return err
 		}
 		if header.Typeflag != tarfile.TypeReg {
-			log.Printf("tar: skip unregular file: %s", header.Name)
+			log.Printf("tar: skip unregular file: %s (%s)", header.Name, filePath)
 			continue
 		}
 		dest := setup.FindDest(header.Name)
 		if nil == dest {
-			log.Printf("tar: skip file: %s", header.Name)
+			log.Printf("tar: skip file: %s (%s)", header.Name, filePath)
 			continue
 		}
-		log.Printf("file in tar: %v", header.Name)
+		log.Printf("tar: extracting %v", header.Name)
 		var modeBits os.FileMode
 		if 0 != (header.Mode & 0111) {
 			modeBits = 0755
