@@ -64,6 +64,12 @@ func (state *FileState) addFileRecord(reader io.Reader, sourceFilePath string) (
 	return nil
 }
 
+func (state *FileState) getHexCheckSum() (hexChkSum []byte) {
+	hexChkSum = make([]byte, hex.EncodedLen(len(state.CheckSum)))
+	hex.Encode(hexChkSum, state.CheckSum)
+	return hexChkSum
+}
+
 // FileStatesByPath is slice of FileState with sort interface implemented.
 type FileStatesByPath []*FileState
 
@@ -166,7 +172,7 @@ func (state *CollectState) LogsState() {
 	sort.Sort(FileStatesByPath(records))
 	log.Print("INFO: logging collect state.")
 	for _, s := range records {
-		log.Printf("file: %s (%v)", s.FilePath, s.CheckSum)
+		log.Printf("file: %s (%s)", s.FilePath, string(s.getHexCheckSum()))
 		if len(s.SourceFiles) > 0 {
 			for _, furl := range s.SourceFiles {
 				log.Printf("- source: %s", furl)
@@ -197,13 +203,12 @@ func (state *CollectState) MakeCheckSumFile(filePath string) (err error) {
 	}
 	defer fp.Close()
 	for _, s := range records {
-		hexChksum := make([]byte, hex.EncodedLen(len(s.CheckSum)))
-		hex.Encode(hexChksum, s.CheckSum)
+		hexChkSum := s.getHexCheckSum()
 		relPath, err := filepath.Rel(state.DestinationFolderPath, s.FilePath)
 		if nil != err {
 			return err
 		}
-		fp.Write(hexChksum)
+		fp.Write(hexChkSum)
 		fp.WriteString(" *")
 		fp.WriteString(relPath)
 		fp.WriteString("\n")
