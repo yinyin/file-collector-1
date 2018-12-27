@@ -112,14 +112,47 @@ func (state *CollectState) CollectWithReader(destination *CollectDest, reader io
 	return nil
 }
 
-// Check check if errors in collecting operation.
-func (state *CollectState) Check() (success bool) {
-	success = true
+func (state *CollectState) checkHaveConflictFiles() (haveConflict bool) {
+	haveConflict = false
 	for _, fileState := range state.FileStates {
 		if 0 != len(fileState.ConflictFiles) {
-			success = false
+			haveConflict = true
 			log.Printf("WARN: have conflict file: %v - %v", fileState.FilePath, fileState.ConflictFiles)
 		}
+	}
+	return haveConflict
+}
+
+func (state *CollectState) checkDestinationCount(operationConfig *CollectOperation) (countMatched bool) {
+	destFileCount := make(map[string]int)
+	for _, s := range operationConfig.CollectSetups {
+		for _, d := range s.Destinations {
+			if "" == d.ToPath {
+				continue
+			}
+			destFileCount[d.ToPath]++
+		}
+	}
+	if len(state.FileStates) == len(destFileCount) {
+		return true
+	}
+	log.Printf("WARN: collected file count not match: state=%d vs. config=%d", len(state.FileStates), len(destFileCount))
+	for k := range destFileCount {
+		if _, ok := state.FileStates[k]; !ok {
+			log.Printf("WARN: cannot reach state of [%s].", k)
+		}
+	}
+	return false
+}
+
+// Check check if errors in collecting operation.
+func (state *CollectState) Check(operationConfig *CollectOperation) (success bool) {
+	success = true
+	if state.checkHaveConflictFiles() {
+		success = false
+	}
+	if !state.checkDestinationCount(operationConfig) {
+		success = false
 	}
 	return success
 }
