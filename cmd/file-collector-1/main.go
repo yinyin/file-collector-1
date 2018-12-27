@@ -32,6 +32,7 @@ func main() {
 		log.Fatalf("failed on writing checksum file [%s]: %v", operationCfg.ChecksumFilePath, err)
 		return
 	}
+	state.LogsState()
 	if !state.Check(operationCfg) {
 		log.Fatalf("result is not in success state.")
 	} else {
