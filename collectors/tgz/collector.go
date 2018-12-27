@@ -2,6 +2,7 @@ package tgz
 
 import (
 	"compress/gzip"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -18,6 +19,7 @@ var TypeName = "tgz"
 // Collector implements a collector for `.tar.gz` or `.tgz` suffixed files.
 func Collector(collectState *filecollector.CollectState, setup *filecollector.CollectSetup, sourceFolderPath string) (err error) {
 	path := filepath.Join(sourceFolderPath, setup.FilePath)
+	log.Printf("INFO: tgz: collecting from [%s]", path)
 	fp, err := os.Open(path)
 	if nil != err {
 		return err

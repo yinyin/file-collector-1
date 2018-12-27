@@ -52,6 +52,7 @@ func CollectViaReader(collectState *filecollector.CollectState, setup *filecolle
 // Collector implements a collector for `.tar` suffixed files.
 func Collector(collectState *filecollector.CollectState, setup *filecollector.CollectSetup, sourceFolderPath string) (err error) {
 	path := filepath.Join(sourceFolderPath, setup.FilePath)
+	log.Printf("INFO: tar: collecting from [%s]", path)
 	fp, err := os.Open(path)
 	if nil != err {
 		return err
