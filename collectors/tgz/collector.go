@@ -17,7 +17,8 @@ var TypeName = "tgz"
 
 // Collector implements a collector for `.tar.gz` or `.tgz` suffixed files.
 func Collector(collectState *filecollector.CollectState, setup *filecollector.CollectSetup, sourceFolderPath string) (err error) {
-	fp, err := os.Open(filepath.Join(sourceFolderPath, setup.FilePath))
+	path := filepath.Join(sourceFolderPath, setup.FilePath)
+	fp, err := os.Open(path)
 	if nil != err {
 		return err
 	}
@@ -26,7 +27,7 @@ func Collector(collectState *filecollector.CollectState, setup *filecollector.Co
 	if nil != err {
 		return err
 	}
-	return tarcollector.CollectViaReader(collectState, setup, gzfp)
+	return tarcollector.CollectViaReader(collectState, setup, gzfp, path)
 }
 
 var collectorDiscoverInstance filecollector.CollectorDiscover

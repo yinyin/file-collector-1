@@ -91,3 +91,27 @@ func FindCollectorCallable(collectorType string, filePath string) (collector Col
 	}
 	return nil, fmt.Errorf("cannot reach collector callable: type=[%s], path=[%s]", collectorType, filePath)
 }
+
+var pathPrefixToClean = []string{
+	"./",
+	"../",
+}
+
+// CleanupPathPrefix removes path component for relative path.
+func CleanupPathPrefix(filePath string) string {
+	for {
+		l0 := len(filePath)
+		if l0 == 0 {
+			break
+		}
+		for _, p := range pathPrefixToClean {
+			filePath = strings.TrimPrefix(filePath, p)
+		}
+		filePath = strings.TrimLeft(filePath, "/")
+		l1 := len(filePath)
+		if l0 == l1 {
+			return filePath
+		}
+	}
+	return ""
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"path/filepath"
 
 	filecollector "github.com/yinyin/file-collector-1"
 )
@@ -26,8 +27,14 @@ func parseCommandParam() (sourceFolderPath, destinationFolderPath string, operat
 		err = ErrRequireSourceFolderPath
 		return
 	}
+	if sourceFolderPath, err = filepath.Abs(sourceFolderPath); nil != err {
+		return
+	}
 	if "" == destinationFolderPath {
 		err = ErrRequireDestFolderPath
+		return
+	}
+	if destinationFolderPath, err = filepath.Abs(destinationFolderPath); nil != err {
 		return
 	}
 	if "" == configFilePath {
