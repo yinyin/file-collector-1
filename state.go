@@ -182,7 +182,7 @@ func (state *CollectState) LogsState() {
 		}
 		if len(s.ConflictFiles) > 0 {
 			for _, furl := range s.ConflictFiles {
-				log.Printf("- conflict: %s", furl)
+				log.Printf("- CONFLICT: %s", furl)
 			}
 		} else {
 			log.Print("- conflict: -N/A-")
