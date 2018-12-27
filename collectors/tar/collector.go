@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	filecollector "github.com/yinyin/file-collector-1"
 )
@@ -32,8 +33,8 @@ func CollectViaReader(collectState *filecollector.CollectState, setup *filecolle
 }
 
 // Collector implements a collector for `.tar` suffixed files.
-func Collector(collectState *filecollector.CollectState, setup *filecollector.CollectSetup) (err error) {
-	fp, err := os.Open(setup.FilePath)
+func Collector(collectState *filecollector.CollectState, setup *filecollector.CollectSetup, sourceFolderPath string) (err error) {
+	fp, err := os.Open(filepath.Join(sourceFolderPath, setup.FilePath))
 	if nil != err {
 		return err
 	}

@@ -6,12 +6,12 @@ import (
 )
 
 // CollectorFunc is the collector interface
-type CollectorFunc func(collectState *CollectState, setup *CollectSetup) (err error)
+type CollectorFunc func(collectState *CollectState, setup *CollectSetup, sourceFolderPath string) (err error)
 
 // CollectorCallable specify callable interface of collector.
 type CollectorCallable interface {
 	// RunCollect perform collector operation.
-	RunCollect(collectState *CollectState, setup *CollectSetup) (err error)
+	RunCollect(collectState *CollectState, setup *CollectSetup, sourceFolderPath string) (err error)
 }
 
 // CollectorDiscover discover collector with given setup.
@@ -44,8 +44,8 @@ func NewSimpleCollectorImplementation(supportedSuffix []string, typeName string,
 }
 
 // RunCollect perform collector operation.
-func (c *SimpleCollectorImplementation) RunCollect(collectState *CollectState, setup *CollectSetup) (err error) {
-	return c.collectorCallable(collectState, setup)
+func (c *SimpleCollectorImplementation) RunCollect(collectState *CollectState, setup *CollectSetup, sourceFolderPath string) (err error) {
+	return c.collectorCallable(collectState, setup, sourceFolderPath)
 }
 
 // GetCollectorByType returns a collector callable base on given collector type
