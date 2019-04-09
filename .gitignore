@@ -35,3 +35,6 @@ Icon
 *.test
 *.out
 .glide/
+
+file-collector-1
+
